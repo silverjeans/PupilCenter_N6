@@ -34,7 +34,7 @@
 		<link>
 			<name>Core</name>
 			<type>2</type>
-			<location>C:/Users/USER/STM32N6/PupilCenter_N6/Application/STM32N6570-DK/Core</location>
+			<locationURI>PARENT-1-PROJECT_LOC/Core</locationURI>
 		</link>
 		<link>
 			<name>STM32N657xx.ld</name>

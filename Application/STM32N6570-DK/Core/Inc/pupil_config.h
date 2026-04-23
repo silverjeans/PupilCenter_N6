@@ -57,14 +57,17 @@
  *  G channel is shifted up to 0..252 by g8_from_rgb565; a 14 mm FOV close-up
  *  pupil sits around 90-130 after ISP auto-exposure, so 130 lets the whole
  *  pupil through while excluding the iris. */
-#define CFG_DETECT_DARK_THRESHOLD    130u
+//#define CFG_DETECT_DARK_THRESHOLD    130u
+#define CFG_DETECT_DARK_THRESHOLD    60u
 
 /** Area filter in pixels, applied in ROI coordinates. Eyelash / eyebrow
  *  shadow blobs measure ~20-25k on the 480x480 preview, so min_area is
  *  set above that floor to exclude them. The close-up pupil is 50-80k, so
  *  the lower bound still leaves comfortable margin. */
-#define CFG_DETECT_MIN_AREA_PX       30000u
-#define CFG_DETECT_MAX_AREA_PX       150000u
+//#define CFG_DETECT_MIN_AREA_PX       30000u
+//#define CFG_DETECT_MAX_AREA_PX       150000u
+#define CFG_DETECT_MIN_AREA_PX       500u
+#define CFG_DETECT_MAX_AREA_PX       30000u
 
 /** Minimum circularity (4*pi*area / perim^2) * 100. 0 disables the check. */
 #define CFG_DETECT_MIN_CIRCULARITY_X100   30

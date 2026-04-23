@@ -176,6 +176,11 @@ void app_main_run(void)
         /* 4. State machine update ------------------------------------- */
         tracking_sm_update(hit && smoothed.valid, &smoothed);
 
+        /* SEARCH 상태에서는 필터 내부 위치를 리셋한다.
+         * 점프 거부(60 px)가 재락(re-lock)을 영구 차단하는 것을 막기 위함. */
+        if (tracking_sm_get_state() == TRK_SEARCH)
+            pupil_filter_reset();
+
         /* 5. One-line UART log ---------------------------------------- */
         const perf_stat_t* ps = perf_monitor_get();
         uint32_t lat_us = ps ? ps->last_latency_us : 0;

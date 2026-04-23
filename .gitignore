@@ -29,8 +29,6 @@
 # -----------------------------------------------------------------------------
 # ST Cube firmware trees (large SDK drops — users should fetch separately)
 # -----------------------------------------------------------------------------
-STM32Cube_FW_N6/
-Middlewares/
 Drivers/
 Utilities/
 _htmresc/
