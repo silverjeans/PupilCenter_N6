@@ -1,0 +1,86 @@
+# -----------------------------------------------------------------------------
+# Build artefacts
+# -----------------------------------------------------------------------------
+**/Debug/
+**/Release/
+*.o
+*.obj
+*.d
+*.su
+*.cyclo
+*.elf
+*.bin
+*.hex
+*.map
+*.list
+*.lst
+
+# -----------------------------------------------------------------------------
+# IDE / editor state
+# -----------------------------------------------------------------------------
+.settings/
+.metadata/
+*.launch
+.vscode/
+.idea/
+*.swp
+*~
+
+# -----------------------------------------------------------------------------
+# ST Cube firmware trees (large SDK drops — users should fetch separately)
+# -----------------------------------------------------------------------------
+STM32Cube_FW_N6/
+Middlewares/
+Drivers/
+Utilities/
+_htmresc/
+
+# -----------------------------------------------------------------------------
+# Vendored ST example artefacts / docs (base project was a fork of
+# STM32N6-GettingStarted-ObjectDetection; those files are not ours to
+# redistribute from this repo).
+# -----------------------------------------------------------------------------
+Doc/
+FSBL/
+Model/
+LICENSE.md
+Application/STM32N6570-DK/Inc/LICENSE.md
+Application/STM32N6570-DK/Src/LICENSE.md
+
+# -----------------------------------------------------------------------------
+# Simulator outputs and intermediate artefacts
+# -----------------------------------------------------------------------------
+sim/out/
+sim/unaligned/
+sim/pupil_detect.dll
+sim/*.o
+sim/*.obj
+sim/__pycache__/
+
+# -----------------------------------------------------------------------------
+# Private / non-shareable content
+# -----------------------------------------------------------------------------
+# IR eye images are biometric data — never commit.
+눈IR/
+*IR*/
+datasets/
+data/
+
+# Personal study notes (kept locally).
+STUDY_NOTE_*.txt
+
+# Backup / legacy sources kept around during bring-up.
+*.bak
+main_original_*
+main_v1_*
+App_v1_*
+
+# Tool-specific config that leaks local paths.
+stmaic_*.conf
+
+# -----------------------------------------------------------------------------
+# OS
+# -----------------------------------------------------------------------------
+Thumbs.db
+.DS_Store
+desktop.ini
