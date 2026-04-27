@@ -181,11 +181,11 @@ void app_main_run(void)
         if (tracking_sm_get_state() == TRK_SEARCH)
             pupil_filter_reset();
 
-        /* 5. One-line UART log ---------------------------------------- */
+        /* 5. One-line UART log (매 프레임 출력 - 필요시 주석 해제) ---- */
         const perf_stat_t* ps = perf_monitor_get();
         uint32_t lat_us = ps ? ps->last_latency_us : 0;
-        result_output_emit(f->seq, f->ts_ms, &smoothed,
-                           (uint8_t)tracking_sm_get_state(), lat_us);
+        /* result_output_emit(f->seq, f->ts_ms, &smoothed,
+                           (uint8_t)tracking_sm_get_state(), lat_us); */
 
         /* 6. Overlay on the RGB frame (in place). Cheap crosshair only. */
         if (smoothed.valid) {
@@ -202,8 +202,7 @@ void app_main_run(void)
             bsp_lcd_flush_dcache(f->data + off, len);
         }
 
-        /* Periodic diagnostic so we can see what the detector is actually
-         * choosing without flooding UART. */
+        /* Periodic diagnostic: detection + performance summary.        */
         if ((f->seq % 30u) == 0u) {
             result_output_emit_event(
                 "diag seq=%lu roi=(%d,%d,%u,%u) state=%u miss=%u "
@@ -213,6 +212,19 @@ void app_main_run(void)
                 (unsigned)state, (unsigned)miss,
                 (unsigned)raw.valid, (int)raw.cx, (int)raw.cy,
                 (unsigned long)raw.area_px, (unsigned)raw.confidence);
+
+            if (ps) {
+                result_output_emit_event(
+                    "perf fps=%lu.%lu lat_avg=%luus lat_last=%luus "
+                    "cpu=%lu.%02lu%% valid=%u%%",
+                    (unsigned long)(ps->avg_fps_m / 1000u),
+                    (unsigned long)(ps->avg_fps_m % 1000u) / 100u,
+                    (unsigned long)ps->avg_latency_us,
+                    (unsigned long)ps->last_latency_us,
+                    (unsigned long)(ps->cpu_occ_x100 / 100u),
+                    (unsigned long)(ps->cpu_occ_x100 % 100u),
+                    (unsigned)ps->valid_ratio_x100);
+            }
         }
 
         /* 6b. Optional LCD-layer overlay (ROI rect, circle) - HW TODO. */

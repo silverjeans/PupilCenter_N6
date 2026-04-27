@@ -19,8 +19,9 @@
 typedef struct {
     uint32_t last_latency_us;
     uint32_t avg_latency_us;
-    uint32_t avg_fps_m;       /* fps * 1000 */
-    uint16_t valid_ratio_x100;/* 0..100 */
+    uint32_t avg_fps_m;         /* fps * 1000  (milli-Hz) */
+    uint16_t valid_ratio_x100;  /* 0..100 % */
+    uint16_t cpu_occ_x100;      /* 0..10000 (= 0.00..100.00 %) */
     uint32_t frames_total;
     uint32_t frames_valid;
 } perf_stat_t;
