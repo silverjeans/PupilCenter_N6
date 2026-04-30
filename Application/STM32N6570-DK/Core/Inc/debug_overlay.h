@@ -28,6 +28,21 @@ typedef struct {
 
 int  debug_overlay_init(void);
 
+/**
+ * @brief Wire LTDC Layer 2 to the PSRAM overlay buffer and record geometry.
+ *
+ *        Call once, after bsp_lcd_attach_camera_layer() and after
+ *        camera_if_get_geometry() has returned the real frame dimensions.
+ *
+ * @param screen_x0  Left edge of the camera preview on the LCD panel.
+ * @param screen_y0  Top  edge of the camera preview on the LCD panel.
+ * @param frame_w    Camera frame width  in pixels (= overlay buffer width).
+ * @param frame_h    Camera frame height in pixels (= overlay buffer height).
+ * @return 0 on success, negative on error.
+ */
+int  debug_overlay_attach_layer(uint32_t screen_x0, uint32_t screen_y0,
+                                uint32_t frame_w,   uint32_t frame_h);
+
 /** Update the frame <-> screen mapping used by all subsequent draw calls. */
 void debug_overlay_set_view(const debug_overlay_view_t* view);
 

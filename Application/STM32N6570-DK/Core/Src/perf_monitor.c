@@ -78,6 +78,19 @@ void perf_monitor_end(int frame_valid)
 
     /* --- Latency --------------------------------------------------- */
     uint32_t lat = now - s_begin_us;
+
+    /* DWT CYCCNT / s_cycles_per_us wraps at ~7.16 s on a 600 MHz core.
+     * A wrap makes (now - s_begin_us) appear as ~4 billion µs, polluting
+     * the EMA for several seconds.  Any value above 1 s is impossible for
+     * a real frame; skip the sample and reset the FPS baseline. */
+    if (lat > 1000000u) {
+        s_have_prev   = 0;
+        s_last_end_us = now;
+        s_stat.frames_total++;
+        if (frame_valid) s_stat.frames_valid++;
+        return;
+    }
+
     s_stat.last_latency_us = lat;
     s_stat.avg_latency_us  =
         (s_stat.frames_total == 0)
@@ -87,7 +100,7 @@ void perf_monitor_end(int frame_valid)
     /* --- FPS (inter-frame period) ----------------------------------- */
     if (s_have_prev) {
         uint32_t period_us = now - s_last_end_us;
-        if (period_us > 0u) {
+        if (period_us > 0u && period_us <= 1000000u) {
             /* fps_m = fps * 1000 = 1e9 / period_us */
             uint32_t fps_m = 1000000000u / period_us;
             s_stat.avg_fps_m =

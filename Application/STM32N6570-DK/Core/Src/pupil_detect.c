@@ -20,6 +20,13 @@
 #include <string.h>
 #include <stdint.h>
 
+/* Helium MVE (Cortex-M55): available when __ARM_FEATURE_MVE >= 1.
+ * arm_mve.h is a CMSIS/ACLE header — no ST BSP dependency. */
+#if defined(__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE >= 1)
+#include "arm_mve.h"
+#define USE_HELIUM 1
+#endif
+
 /* ------------------------------------------------------------------ */
 /* Static working memory.                                             */
 /*                                                                    */
@@ -92,10 +99,34 @@ int threshold_dark_region_g(const frame_t* frame,
         for (uint16_t y = 0; y < h; ++y) {
             const uint8_t* src = base + xoff;
             uint8_t*       dst = dst_mask + (uint32_t)y * w;
-
-            /* Unrolled by 4. Compilers often fail to unroll across the
-             * RGB565->G extraction, so do it by hand. */
             uint16_t x = 0;
+
+#ifdef USE_HELIUM
+            /* Helium MVE path: 8 RGB565 pixels per iteration.
+             *
+             * RGB565 (16-bit LE): R[15:11] G[10:5] B[4:0]
+             * G8 = ((px >> 5) & 0x3F) << 2  →  0..252
+             *
+             * MVE has no unsigned vcmpleq. Instead use vcmphiq (unsigned >):
+             *   vcmphiq_n_u16(g8v, thr) → predicate where g8v > thr (not dark)
+             *   vpselq(0, 1, above)     → 0 where above, 1 where ≤ thr (dark)
+             */
+            for (; x + 8 <= w; x += 8) {
+                uint16x8_t px   = vldrhq_u16((uint16_t const*)(uintptr_t)src);
+                /* G6 = (px >> 5) & 0x3F */
+                uint16x8_t g6   = vandq_u16(vshrq_n_u16(px, 5u),
+                                            vdupq_n_u16(0x3Fu));
+                /* G8 = G6 << 2  (0..252) */
+                uint16x8_t g8v  = vshlq_n_u16(g6, 2u);
+                /* res = 1 where g8v ≤ thr, 0 where g8v > thr */
+                uint16x8_t res  = vpselq_u16(vdupq_n_u16(0u), vdupq_n_u16(1u),
+                                             vcmphiq_n_u16(g8v, (uint16_t)thr));
+                vstrbq_u16(dst, res);
+                src += 16;   /* 8 pixels × 2 bytes */
+                dst +=  8;
+            }
+#else
+            /* Scalar 4× unroll fallback */
             for (; x + 4 <= w; x += 4) {
                 uint8_t g0 = g8_from_rgb565(src + 0);
                 uint8_t g1 = g8_from_rgb565(src + 2);
@@ -108,6 +139,8 @@ int threshold_dark_region_g(const frame_t* frame,
                 src += 8;
                 dst += 4;
             }
+#endif
+            /* Scalar tail for remaining pixels (< 8 or < 4) */
             for (; x < w; ++x) {
                 uint8_t g = g8_from_rgb565(src);
                 *dst++ = (g <= thr);

@@ -44,3 +44,29 @@ void bsp_lcd_flush_dcache(const void* addr, uint32_t len)
     if (!addr || len == 0) return;
     SCB_CleanDCache_by_Addr((uint32_t*)(uintptr_t)addr, (int32_t)len);
 }
+
+/* ---------------------------------------------------------------------------
+ * LTDC Layer 2 — ARGB4444 overlay (hardware alpha-blended over Layer 1).
+ *
+ * The caller supplies a PSRAM buffer (uint16_t, ARGB4444) and the screen
+ * rectangle that the overlay covers.  Transparent pixels must be 0x0000
+ * (alpha = 0); opaque red is 0xFF00 (A=F R=F G=0 B=0).
+ *
+ * Returns 0 on success, negative on BSP error.
+ * --------------------------------------------------------------------------- */
+int bsp_lcd_init_overlay_layer(uint32_t x0, uint32_t y0,
+                               uint32_t w,  uint32_t h,
+                               const uint16_t* buf)
+{
+    if (!buf || w == 0 || h == 0) return -1;
+
+    BSP_LCD_LayerConfig_t cfg = {0};
+    cfg.X0          = x0;
+    cfg.Y0          = y0;
+    cfg.X1          = x0 + w;
+    cfg.Y1          = y0 + h;
+    cfg.PixelFormat = LCD_PIXEL_FORMAT_ARGB4444;
+    cfg.Address     = (uint32_t)buf;
+
+    return (BSP_LCD_ConfigLayer(0, LTDC_LAYER_2, &cfg) == BSP_ERROR_NONE) ? 0 : -2;
+}

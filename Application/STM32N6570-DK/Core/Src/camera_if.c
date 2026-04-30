@@ -82,6 +82,27 @@ void camera_if_stop(void)
 }
 
 /* ------------------------------------------------------------------ */
+/* ROI-only DCache invalidation                                        */
+/*                                                                     */
+/* DCMIPP writes the full frame to PSRAM (bypasses DCache). The CPU   */
+/* only reads pixels inside the ROI for detection. Invalidating only  */
+/* those rows reduces the per-frame cost from 768 KB to <= 50 KB.     */
+/*                                                                     */
+/* Not in camera_if.h intentionally — only app_main calls this.       */
+/* ------------------------------------------------------------------ */
+void camera_if_invalidate_region(int x, int y, int w, int h)
+{
+    if (w <= 0 || h <= 0) return;
+    const uint32_t stride   = s_bg_width * 2u;
+    const uint8_t* row      = s_bg_buffer + (uint32_t)y * stride + (uint32_t)x * 2u;
+    const int32_t  row_bytes = (int32_t)(w * 2);
+    for (int r = 0; r < h; ++r) {
+        SCB_InvalidateDCache_by_Addr((uint32_t*)(uintptr_t)row, row_bytes);
+        row += stride;
+    }
+}
+
+/* ------------------------------------------------------------------ */
 /* Pump - called by frame_mgr / app_main. Serves one frame per new    */
 /* DCMIPP delivery. Non-blocking.                                     */
 /* ------------------------------------------------------------------ */

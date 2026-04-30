@@ -34,18 +34,18 @@
  *  PUPIL_DETECT_MAX_ROI_W/H (256) so detection isn't short-circuited.
  *  With a 14 mm FOV and forehead-rest, the pupil is always near center
  *  so 256x256 is plenty. */
-#define CFG_ROI_SEARCH_W             256u
-#define CFG_ROI_SEARCH_H             256u
+#define CFG_ROI_SEARCH_W             160u//256u
+#define CFG_ROI_SEARCH_H             160u//256u
 
 /** TRACK state ROI. Must fit the full pupil (~250 px diameter) plus slack
  *  for saccades; kept under detector's MAX_ROI (256). */
-#define CFG_ROI_TRACK_W              240u
-#define CFG_ROI_TRACK_H              240u
+#define CFG_ROI_TRACK_W              144u//240u
+#define CFG_ROI_TRACK_H              144u//240u
 
 /** RECOVERY ROI starts at this size and grows each missed frame. */
 #define CFG_ROI_RECOVERY_INIT_W      224u
 #define CFG_ROI_RECOVERY_INIT_H      224u
-#define CFG_ROI_RECOVERY_GROW_STEP   32u   /* add per failing frame */
+#define CFG_ROI_RECOVERY_GROW_STEP   32u  /* add per failing frame */
 #define CFG_ROI_RECOVERY_MAX_W       CFG_ROI_SEARCH_W
 #define CFG_ROI_RECOVERY_MAX_H       CFG_ROI_SEARCH_H
 

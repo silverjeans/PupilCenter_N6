@@ -44,19 +44,17 @@
  * ------------------------------------------------------------------------- */
 extern int bsp_uart_write(const uint8_t* data, size_t len);
 
-/* Attach LTDC layer 0 to the camera buffer. Implemented in Src/bsp_lcd.c.
+/* Attach LTDC layer 1 to the camera buffer. Implemented in Src/bsp_lcd.c.
  * Kept out of Core/ because it pulls in BSP LCD headers. */
 extern int bsp_lcd_attach_camera_layer(const uint8_t* bg,
                                        uint32_t bg_x, uint32_t bg_y,
                                        uint32_t bg_w, uint32_t bg_h);
 
-/* Flush D-cache after in-place overlay writes so LTDC (bus master) reads
- * the updated PSRAM bytes instead of stale RAM under the CPU cache. */
-extern void bsp_lcd_flush_dcache(const void* addr, uint32_t len);
-
 /* Pull new camera frames into frame_mgr. Declared in camera_if.c; not in
  * the public camera_if.h because only app_main is allowed to pump. */
 int camera_if_pump(void);
+
+
 
 /* ---------------------------------------------------------------------------
  * Camera callback trampoline: push frames into frame_mgr. Runs from ISR
@@ -110,6 +108,10 @@ static int app_main_init(void)
         /* Teach roi_mgr about the real preview geometry (may differ from
          * the CFG_FRAME_* default). */
         roi_mgr_init(bw, bh);
+
+        /* Wire LTDC Layer 2 (ARGB4444) to the overlay buffer.
+         * The overlay sits on top of the camera layer at the same position. */
+        debug_overlay_attach_layer(bx, by, bw, bh);
     }
 
     /* Fire the camera last so no frames arrive before the pipeline is ready. */
@@ -187,32 +189,8 @@ void app_main_run(void)
         /* result_output_emit(f->seq, f->ts_ms, &smoothed,
                            (uint8_t)tracking_sm_get_state(), lat_us); */
 
-        /* 6. Overlay on the RGB frame (in place). Cheap crosshair only. */
-        if (smoothed.valid) {
-            const int HALF = 20;
-            uint32_t color = (f->fmt == PIX_FMT_RGB565) ? 0xF800u : 0x00FF0000u;
-            overlay_draw_cross(f, smoothed.cx, smoothed.cy, HALF, color);
-            /* Flush only the bounding rows of the cross back to PSRAM.
-             * Cleaning the full frame every tick stalls LTDC and makes
-             * the crosshair tear / disappear under load. */
-            int y0 = (int)smoothed.cy - HALF; if (y0 < 0) y0 = 0;
-            int y1 = (int)smoothed.cy + HALF; if (y1 >= f->height) y1 = f->height - 1;
-            uint32_t off = (uint32_t)y0 * f->stride;
-            uint32_t len = (uint32_t)(y1 - y0 + 1) * f->stride;
-            bsp_lcd_flush_dcache(f->data + off, len);
-        }
-
         /* Periodic diagnostic: detection + performance summary.        */
-        if ((f->seq % 30u) == 0u) {
-            result_output_emit_event(
-                "diag seq=%lu roi=(%d,%d,%u,%u) state=%u miss=%u "
-                "raw_valid=%u raw_cx=%d raw_cy=%d raw_area=%lu raw_conf=%u",
-                (unsigned long)f->seq,
-                (int)roi.x, (int)roi.y, (unsigned)roi.w, (unsigned)roi.h,
-                (unsigned)state, (unsigned)miss,
-                (unsigned)raw.valid, (int)raw.cx, (int)raw.cy,
-                (unsigned long)raw.area_px, (unsigned)raw.confidence);
-
+        if ((f->seq % 60u) == 0u) {
             if (ps) {
                 result_output_emit_event(
                     "perf fps=%lu.%lu lat_avg=%luus lat_last=%luus "
@@ -227,7 +205,7 @@ void app_main_run(void)
             }
         }
 
-        /* 6b. Optional LCD-layer overlay (ROI rect, circle) - HW TODO. */
+        /* 6. LTDC Layer 2 ARGB4444 overlay — hardware crosshair. -------- */
         debug_overlay_begin_frame();
         debug_overlay_draw(&roi, &smoothed);
         debug_overlay_end_frame();
