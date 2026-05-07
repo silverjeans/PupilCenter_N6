@@ -55,6 +55,9 @@ C_SOURCES += Core/Src/tracking_sm.c
 C_SOURCES += Core/Src/result_output.c
 C_SOURCES += Core/Src/perf_monitor.c
 C_SOURCES += Core/Src/debug_overlay.c
+C_SOURCES += Core/Src/tim_pwm.c
+C_SOURCES += Core/Src/encoder.c
+C_SOURCES += Core/Src/encoder2.c
 
 # STM32Cube_FW_N6 HAL drivers - keep only what we actually use
 C_SOURCES += ../../STM32Cube_FW_N6/Drivers/CMSIS/Device/ST/STM32N6xx/Source/Templates/system_stm32n6xx_fsbl.c
@@ -77,6 +80,8 @@ C_SOURCES += ../../STM32Cube_FW_N6/Drivers/STM32N6xx_HAL_Driver/Src/stm32n6xx_ha
 C_SOURCES += ../../STM32Cube_FW_N6/Drivers/STM32N6xx_HAL_Driver/Src/stm32n6xx_hal_rcc_ex.c
 C_SOURCES += ../../STM32Cube_FW_N6/Drivers/STM32N6xx_HAL_Driver/Src/stm32n6xx_hal_xspi.c
 C_SOURCES += ../../STM32Cube_FW_N6/Drivers/STM32N6xx_HAL_Driver/Src/stm32n6xx_hal_bsec.c
+C_SOURCES += ../../STM32Cube_FW_N6/Drivers/STM32N6xx_HAL_Driver/Src/stm32n6xx_hal_tim.c
+C_SOURCES += ../../STM32Cube_FW_N6/Drivers/STM32N6xx_HAL_Driver/Src/stm32n6xx_hal_tim_ex.c
 C_SOURCES += ../../STM32Cube_FW_N6/Drivers/BSP/STM32N6570-DK/stm32n6570_discovery.c
 C_SOURCES += ../../STM32Cube_FW_N6/Drivers/BSP/STM32N6570-DK/stm32n6570_discovery_bus.c
 C_SOURCES += ../../STM32Cube_FW_N6/Drivers/BSP/STM32N6570-DK/stm32n6570_discovery_lcd.c
