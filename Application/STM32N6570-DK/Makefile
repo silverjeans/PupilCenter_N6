@@ -58,6 +58,7 @@ C_SOURCES += Core/Src/debug_overlay.c
 C_SOURCES += Core/Src/tim_pwm.c
 C_SOURCES += Core/Src/encoder.c
 C_SOURCES += Core/Src/encoder2.c
+C_SOURCES += Core/Src/gpio_out.c
 
 # STM32Cube_FW_N6 HAL drivers - keep only what we actually use
 C_SOURCES += ../../STM32Cube_FW_N6/Drivers/CMSIS/Device/ST/STM32N6xx/Source/Templates/system_stm32n6xx_fsbl.c
