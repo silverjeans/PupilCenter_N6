@@ -23,10 +23,10 @@
 
 /** 출력 핀 식별자 */
 typedef enum {
-    GPIO_OUT1 = 0,   /* PD13 */
-    GPIO_OUT2 = 1,   /* PF1  */
-    GPIO_OUT3 = 2,   /* PB8  */
-    GPIO_OUT4 = 3,   /* PG9  */
+    DC_ENABLE_1 = 0,   /* PD13 */
+    DC_DIR_1 = 1,   /* PF1  */
+    DC_ENABLE_2 = 2,   /* PB8  */
+    DC_DIR_2 = 3,   /* PG9  */
 } GPIO_OutPin_t;
 
 /**
